@@ -258,6 +258,15 @@ void matrix_scan_user(void) {
     SEQ_ONE_KEY(KC_A) {
         TAP_ONCE(KC_ESC);
     }
+    SEQ_ONE_KEY(KC_R) {
+        TAP_ONCE(KC_TAB);
+    }
+    SEQ_ONE_KEY(KC_I) {
+        TAP_ONCE(LSFT(KC_TAB));
+    }
+    SEQ_ONE_KEY(KC_RALT) {
+        TAP_ONCE(RALT(KC_SPC));
+    }
     SEQ_ONE_KEY(KC_O) {
       TAP_ONCE(KC_ESC);
     }
