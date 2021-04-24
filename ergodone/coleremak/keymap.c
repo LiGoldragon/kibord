@@ -273,6 +273,12 @@ void matrix_scan_user(void) {
         unregister_code(KC_SPC);
         unregister_code(KC_RALT);
     }
+    SEQ_ONE_KEY(KC_N) {
+        register_code(KC_RALT);
+        register_code(KC_SPC);
+        unregister_code(KC_SPC);
+        unregister_code(KC_RALT);
+    }
     SEQ_ONE_KEY(KC_O) {
       TAP_ONCE(KC_ESC);
     }
