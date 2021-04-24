@@ -5,6 +5,7 @@
     qmk_firmware = {
       url = file:///git/github.com/qmk/qmk_firmware;
       ref = "master";
+      rev = "bc15c4f4ab81c1e2950dfc1c38cf86dc626573c9";
       type = "git";
       flake = false;
       submodules = false;
@@ -148,6 +149,7 @@
             argcomplete
             colorama
             hjson
+            jsonschema
             milc
             pygments
             # requirements-dev.txt
@@ -186,7 +188,7 @@
               version = qmk_firmware.shortRev;
               src = qmk_firmware;
 
-              buildInputs = [ dfu-programmer dfu-util diffutils git python3 ]
+              buildInputs = [ dfu-programmer dfu-util diffutils git pythonEnv ]
                 ++ optionals avr avrPackages
                 ++ optionals arm [ gcc-arm-embedded ]
                 ++ optionals teensy [ teensy-loader-cli ];
@@ -228,7 +230,8 @@
             };
             postPatch = ''
               substituteInPlace easyhid/easyhid.py \
-                --replace "ctypes.util.find_library('hidapi-libusb')" "'${hidapi}/lib/libhidapi-libusb.so.0'"
+                --replace "ctypes.util.find_library('hidapi-libusb')" \
+                "'${hidapi}/lib/libhidapi-libusb.so.0'"
             '';
             buildInputs = [ hidapi cffi ];
           };
