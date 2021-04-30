@@ -253,7 +253,8 @@ void matrix_scan_user(void) {
     leader_end();
 
     SEQ_ONE_KEY(RALT(KC_SPC)) {
-      TAP_ONCE(OSM(MOD_RALT));
+        register_code(OSM(MOD_RALT));
+        unregister_code(OSM(MOD_RALT));
     }
     SEQ_ONE_KEY(KC_A) {
         TAP_ONCE(KC_ESC);
