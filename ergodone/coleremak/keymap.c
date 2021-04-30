@@ -63,7 +63,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                        KC_PASTE,  KC_BSPC,   KC_6,          KC_7,           KC_8,     KC_9,          KC_0,                    
                        KC_LBRC,   KC_BSLS,   KC_Y,          KC_U,           KC_I,     KC_O,          KC_P,                    
                                   KC_QUOTE,  KC_H,          KC_J,           KC_K,     RCTL_T(KC_L),  KC_SLSH,         
-                       KC_RBRC,   KC_ENT,    RGUI_T(KC_N),  KC_M,           KC_COMM,  KC_DOT,        MT(MOD_RSFT,KC_SCLN),
+	               KC_RBRC,   RALT(KC_SPC), RGUI_T(KC_N),  KC_M,           KC_COMM,  KC_DOT,        MT(MOD_RSFT,KC_SCLN),
                                              KC_RALT,       LT(FN,KC_ESC),  KC_DOWN,  KC_UP,         KC_EQL,
              KC_INS,    KC_DEL,
              KC_PGUP,
@@ -105,6 +105,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                        KC_PASTE,  KC_BSPC,   KC_6,          KC_7,           KC_8,     KC_9,          KC_0,
                        KC_LBRC,   KC_BSLS,   KC_J,          KC_L,           KC_U,     KC_Y,          KC_SCLN,
                                   KC_QUOTE,  KC_H,          KC_N,           KC_E,     RCTL_T(KC_I),  KC_SLSH,
+	               KC_RBRC,   RALT(KC_SPC), RGUI_T(KC_K),  KC_M,           KC_COMM,  KC_DOT,        MT(MOD_RSFT,KC_O),
                        KC_RBRC,   KC_ENT,    RGUI_T(KC_K),  KC_M,           KC_COMM,  KC_DOT,        MT(MOD_RSFT,KC_O),
                                              KC_RALT,       LT(FN,KC_ESC),  KC_DOWN,  KC_UP,         KC_EQL,
              KC_INS,    KC_DEL,
@@ -252,7 +253,7 @@ void matrix_scan_user(void) {
     leading = false;
     leader_end();
 
-    SEQ_TWO_KEYS(KC_T,KC_N) {
+    SEQ_ONE_KEY(RALT(KC_SPC)) {
       TAP_ONCE(KC_ENT);
     }
     SEQ_ONE_KEY(KC_A) {
