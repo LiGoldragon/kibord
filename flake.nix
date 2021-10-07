@@ -3,72 +3,43 @@
 
   inputs = {
     qmk_firmware = {
-      url = file:///git/github.com/qmk/qmk_firmware;
-      ref = "master";
-      rev = "bc15c4f4ab81c1e2950dfc1c38cf86dc626573c9";
-      type = "git";
+      url = github:qmk/qmk_firmware/bc15c4f4ab81c1e2950dfc1c38cf86dc626573c9;
       flake = false;
-      submodules = false;
     };
     ChibiOS = {
-      url = file:///git/github.com/qmk/ChibiOS;
-      ref = "master";
-      type = "git";
+      url = github:qmk/ChibiOS;
       flake = false;
-      submodules = false;
     };
     ChibiOS-Contrib = {
-      url = file:///git/github.com/qmk/ChibiOS-Contrib;
-      ref = "master";
-      type = "git";
+      url = github:qmk/ChibiOS-Contrib;
       flake = false;
-      submodules = false;
     };
     uGFX = {
-      url = file:///git/github.com/qmk/uGFX;
-      ref = "master";
-      type = "git";
+      url = github:qmk/uGFX;
       flake = false;
-      submodules = false;
     };
     googletest = {
-      url = file:///git/github.com/qmk/googletest;
-      ref = "master";
-      type = "git";
+      url = github:qmk/googletest;
       flake = false;
-      submodules = false;
     };
     lufa = {
-      url = file:///git/github.com/qmk/lufa;
-      ref = "master";
-      type = "git";
+      url = github:qmk/lufa;
       flake = false;
-      submodules = false;
     };
     v-usb = {
-      url = file:///git/github.com/qmk/v-usb;
-      ref = "master";
-      type = "git";
+      url = github:qmk/v-usb;
       flake = false;
-      submodules = false;
     };
     printf = {
-      url = file:///git/github.com/qmk/printf;
-      ref = "master";
-      type = "git";
+      url = github:qmk/printf;
       flake = false;
-      submodules = false;
     };
     kp_boot_32u4 = {
-      url = file:///git/github.com/ahtn/kp_boot_32u4;
-      ref = "master";
-      type = "git";
+      url = github:ahtn/kp_boot_32u4;
       flake = false;
     };
     hexdumpSrc = {
-      url = file:///git/github.com/sarnold/hexdump;
-      ref = "main";
-      type = "git";
+      url = github:sarnold/hexdump;
       flake = false;
     };
   };
