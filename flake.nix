@@ -49,9 +49,9 @@
       modz = [ "pkgs" ];
 
 
-      lamdy =
+      lamdy = with builtins;
         { self
-        , kor
+        , lib
         , pkgsCross
         , stdenv
         , python3
@@ -68,8 +68,7 @@
         }:
 
         let
-          inherit (builtins) concatStringsSep;
-          inherit (kor) optionals mapAttrsToList;
+          inherit (lib) optionals mapAttrsToList optional optionalString;
           inherit (stdenv) mkDerivation;
 
           submodulesIndeks = {
@@ -141,6 +140,9 @@
             "-L${avrlibc}/avr/lib/avr51"
           ];
 
+          bypassGccBug = true;
+          disableArrayBoundsFlag = "-Wno-array-bounds";
+
           avrPackages = [
             avrdude
             pkgsCross.avr.buildPackages.gcc
@@ -169,7 +171,7 @@
                 ln -s ${iuniksDir} ./keyboards/${keyboardModel}/keymaps/${keymap}
               '';
 
-              CFLAGS = optionals avr avr_incflags;
+              CFLAGS = optionals avr avr_incflags ++ (optional bypassGccBug disableArrayBoundsFlag);
               ASFLAGS = optionals avr avr_incflags;
 
               buildPhase = ''
