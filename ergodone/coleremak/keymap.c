@@ -39,11 +39,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                        KC_PASTE,  KC_BSPC,   KC_6,          KC_7,           KC_8,     KC_9,          KC_0,                    
                        KC_LBRC,   KC_BSLS,   KC_Y,          KC_U,           KC_I,     KC_O,          KC_P,                    
 	               KC_QUOTE,  KC_H,          KC_J,      RALT_T(KC_K),     RCTL_T(KC_L),  KC_SLSH,         
-	               KC_RBRC,   KC_ENT,    RGUI_T(KC_N),  KC_M,           KC_COMM,  KC_DOT,        MT(MOD_RSFT,KC_SCLN),
+	               KC_RBRC,   KC_FN1,    RGUI_T(KC_N),  KC_M,           KC_COMM,  KC_DOT,        MT(MOD_RSFT,KC_SCLN),
 	                                     LALT(KC_SPC),   LT(FN,KC_ESC),  KC_DOWN,  KC_UP,         KC_EQL,
              KC_INS,    KC_DEL,
              KC_PGUP,
-             KC_PGDN,   KC_ENT,  KC_TAB
+             KC_PGDN,   KC_TAB,  KC_ENT
 ),
 
 [COLEMAK] = LAYOUT_ergodox(
@@ -59,13 +59,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                                                       KC_SPC,  KC_BSPC,  KC_END,
             // right hand
                        KC_PASTE,  KC_BSPC,   KC_6,          KC_7,           KC_8,     KC_9,          KC_0,
-                       KC_LBRC,   KC_BSLS,   KC_J,          KC_L,           KC_U,     KC_Y,          KC_SCLN,
+	    KC_LBRC,   KC_BSLS,   KC_J,          KC_L,           KC_U,     KC_Y,          KC_SCLN,
                                   KC_QUOTE,  KC_H,          KC_N,           RALT_T(KC_E),     RCTL_T(KC_I),  KC_SLSH,
-	               KC_RBRC,   KC_ENT,    RGUI_T(KC_K),  KC_M,           KC_COMM,  KC_DOT,        MT(MOD_RSFT,KC_O),
+	               KC_RBRC,   KC_FN1,    RGUI_T(KC_K),  KC_M,           KC_COMM,  KC_DOT,        MT(MOD_RSFT,KC_O),
 	                                     LALT(KC_SPC),   LT(FN,KC_ESC),  KC_DOWN,  KC_UP,         KC_EQL,
              KC_INS,    KC_DEL,
              KC_PGUP,
-             KC_PGDN,   KC_ENT,  KC_TAB
+             KC_PGDN,   KC_TAB,  KC_ENT
 ),
 
 [FN] = LAYOUT_ergodox(
@@ -74,19 +74,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        KC_GRV,        KC_EXLM,    KC_AT,     KC_HASH,    KC_DLR,        _______,    KC_F11,
        KC_TAB ,       LCTL_T(KC_1), KC_2,      KC_3,       KC_MINS,       KC_MINS,
        LSFT_T(KC_0),  KC_LPRN,    KC_LBRC,   KC_LCBR,    LGUI_T(KC_4),  KC_FN1,      _______,
-       _______,       _______,    _______,   _______,    KC_LEAD,        
-                                                       KC_CAPS,  KC_LGUI,
-                                                                 KC_HOME,
-                                              KC_SPC,  KC_BSPC,  KC_END,
+       KC_LCTL,       KC_LEFT,    KC_RGHT,   LT(FN, KC_BSPC),  KC_LEAD,        
+                                                                          KC_CAPS,  KC_LGUI,
+                                                                                    KC_HOME,
+                                                                 KC_SPC,  KC_BSPC,  KC_END,
        // right hand
        _______,  RESET,   CLMK,            QWRTY,      _______,     _______,    _______, 
        _______,  KC_F12,  KC_CIRC,         KC_AMPR,    KC_ASTR,     KC_PERC,    KC_BSLS, 
                  KC_EQL,  KC_EQL,          KC_6,       KC_7,        RCTL_T(KC_8), KC_QUOT, 
-       _______,  KC_ENT,  RGUI_T(KC_5),    KC_RCBR,    KC_RBRC,     KC_RPRN,    RSFT_T(KC_9),
-                          KC_RALT,  _______, _______,  _______,  _______,
+       _______,  KC_FN1,  RGUI_T(KC_5),    KC_RCBR,    KC_RBRC,     KC_RPRN,    RSFT_T(KC_9),
+                          LALT(KC_SPC),   LT(FN,KC_ESC),  KC_DOWN,  KC_UP,         KC_EQL,
        KC_INS,    KC_DEL,
        KC_PGUP,
-       KC_PGDN,  KC_ENT,  KC_TAB
+       KC_PGDN,  KC_TAB,  KC_ENT
 ),
 };
 

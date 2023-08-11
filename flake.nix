@@ -3,43 +3,43 @@
 
   inputs = {
     qmk_firmware = {
-      url = github:qmk/qmk_firmware/bc15c4f4ab81c1e2950dfc1c38cf86dc626573c9;
+      url = "github:qmk/qmk_firmware/bc15c4f4ab81c1e2950dfc1c38cf86dc626573c9";
       flake = false;
     };
     ChibiOS = {
-      url = github:qmk/ChibiOS;
+      url = "github:qmk/ChibiOS";
       flake = false;
     };
     ChibiOS-Contrib = {
-      url = github:qmk/ChibiOS-Contrib;
+      url = "github:qmk/ChibiOS-Contrib";
       flake = false;
     };
     uGFX = {
-      url = github:qmk/uGFX;
+      url = "github:qmk/uGFX";
       flake = false;
     };
     googletest = {
-      url = github:qmk/googletest;
+      url = "github:qmk/googletest";
       flake = false;
     };
     lufa = {
-      url = github:qmk/lufa;
+      url = "github:qmk/lufa";
       flake = false;
     };
     v-usb = {
-      url = github:qmk/v-usb;
+      url = "github:qmk/v-usb";
       flake = false;
     };
     printf = {
-      url = github:qmk/printf;
+      url = "github:qmk/printf";
       flake = false;
     };
     kp_boot_32u4 = {
-      url = github:ahtn/kp_boot_32u4;
+      url = "github:ahtn/kp_boot_32u4";
       flake = false;
     };
     hexdumpSrc = {
-      url = github:sarnold/hexdump;
+      url = "github:sarnold/hexdump";
       flake = false;
     };
   };
@@ -68,8 +68,11 @@
         }:
 
         let
-          inherit (lib) optionals mapAttrsToList optional optionalString;
+          inherit (lib) optionals mapAttrsToList optional ;
           inherit (stdenv) mkDerivation;
+
+          inherit (python3Packages) buildPythonApplication
+            buildPythonPackage fetchPypi intelhex cffi;
 
           submodulesIndeks = {
             ChibiOS = "lib/chibios";
@@ -88,7 +91,7 @@
           linkSubmodules = concatStringsSep "\n"
             (mapAttrsToList linkSubmodule submodulesIndeks);
 
-          hjson = with python3Packages; buildPythonPackage rec {
+          hjson = buildPythonPackage rec {
             pname = "hjson";
             version = "3.0.1";
             src = fetchPypi {
@@ -98,14 +101,14 @@
             doCheck = false;
           };
 
-          milc = with python3Packages; buildPythonPackage rec {
+          milc = buildPythonPackage rec {
             pname = "milc";
             version = "1.0.10";
             src = fetchPypi {
               inherit pname version;
               sha256 = "1q1p7qrqk78mw67nhv04zgxaq8himmdxmy2vp4fmi7chwgcbpi32";
             };
-            propagatedBuildInputs = [
+            propagatedBuildInputs = with python3Packages; [
               appdirs
               argcomplete
               colorama
@@ -184,8 +187,6 @@
               '';
             };
 
-          inherit (python3Packages) buildPythonApplication
-            buildPythonPackage fetchPypi intelhex cffi;
 
           hexdump = buildPythonPackage {
             pname = "hexdump";
@@ -236,10 +237,7 @@
         {
           inherit kpBootCli kpBootloader;
 
-          lisErgodone =
-            let
-            in
-            mkQmkOS {
+          lisErgodone = mkQmkOS {
               avr = true;
               kibord = {
                 iuniksDir = ./ergodone/coleremak;
