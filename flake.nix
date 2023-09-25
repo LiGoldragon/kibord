@@ -68,7 +68,7 @@
         }:
 
         let
-          inherit (lib) optionals mapAttrsToList optional ;
+          inherit (lib) optionals mapAttrsToList optional;
           inherit (stdenv) mkDerivation;
 
           inherit (python3Packages) buildPythonApplication
@@ -237,17 +237,25 @@
         {
           inherit kpBootCli kpBootloader;
 
-          lisErgodone = mkQmkOS {
+          LiGoldragon = {
+            minidox = mkQmkOS {
+              avr = true;
+              kibord = {
+                iuniksDir = ./maple_computing/minidox/one;
+                keyboardModel = "ergodone";
+              };
+            };
+            ergodone = mkQmkOS {
               avr = true;
               kibord = {
                 iuniksDir = ./ergodone/coleremak;
                 keyboardModel = "ergodone";
               };
             };
+          };
 
         };
 
     };
-
   };
 }
