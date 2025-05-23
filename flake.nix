@@ -44,218 +44,252 @@
     };
   };
 
-  outputs = localFlakes@{ self, qmk_firmware, kp_boot_32u4, hexdumpSrc, ... }: {
-    SobUyrld = {
-      modz = [ "pkgs" ];
+  outputs =
+    localFlakes@{
+      self,
+      qmk_firmware,
+      kp_boot_32u4,
+      hexdumpSrc,
+      ...
+    }:
+    {
+      SobUyrld = {
+        modz = [ "pkgs" ];
 
+        lamdy =
+          with builtins;
+          {
+            self,
+            lib,
+            pkgsCross,
+            stdenv,
+            python3,
+            python3Packages,
+            dfu-programmer,
+            dfu-util,
+            diffutils,
+            git,
+            avrdude,
+            gcc-arm-embedded,
+            teensy-loader-cli,
+            hidapi,
+            fetchhg,
+          }:
 
-      lamdy = with builtins;
-        { self
-        , lib
-        , pkgsCross
-        , stdenv
-        , python3
-        , python3Packages
-        , dfu-programmer
-        , dfu-util
-        , diffutils
-        , git
-        , avrdude
-        , gcc-arm-embedded
-        , teensy-loader-cli
-        , hidapi
-        , fetchhg
-        }:
+          let
+            inherit (lib) optionals mapAttrsToList optional;
+            inherit (stdenv) mkDerivation;
 
-        let
-          inherit (lib) optionals mapAttrsToList optional;
-          inherit (stdenv) mkDerivation;
+            inherit (python3Packages)
+              buildPythonApplication
+              buildPythonPackage
+              fetchPypi
+              intelhex
+              cffi
+              ;
 
-          inherit (python3Packages) buildPythonApplication
-            buildPythonPackage fetchPypi intelhex cffi;
-
-          submodulesIndeks = {
-            ChibiOS = "lib/chibios";
-            ChibiOS-Contrib = "lib/chibios-contrib";
-            uGFX = "lib/ugfx";
-            googletest = "lib/googletest";
-            lufa = "lib/lufa";
-            v-usb = "lib/vusb";
-            printf = "lib/printf";
-          };
-
-          linkSubmodule = n: v:
-            let mod = localFlakes.${n};
-            in "ln -s ${mod}/* ${v}";
-
-          linkSubmodules = concatStringsSep "\n"
-            (mapAttrsToList linkSubmodule submodulesIndeks);
-
-          hjson = buildPythonPackage rec {
-            pname = "hjson";
-            version = "3.0.1";
-            src = fetchPypi {
-              inherit pname version;
-              sha256 = "1yaimcgz8w0ps1wk28wk9g9zdidp79d14xqqj9rjkvxalvx2f5qx";
+            submodulesIndeks = {
+              ChibiOS = "lib/chibios";
+              ChibiOS-Contrib = "lib/chibios-contrib";
+              uGFX = "lib/ugfx";
+              googletest = "lib/googletest";
+              lufa = "lib/lufa";
+              v-usb = "lib/vusb";
+              printf = "lib/printf";
             };
-            doCheck = false;
-          };
 
-          milc = buildPythonPackage rec {
-            pname = "milc";
-            version = "1.0.10";
-            src = fetchPypi {
-              inherit pname version;
-              sha256 = "1q1p7qrqk78mw67nhv04zgxaq8himmdxmy2vp4fmi7chwgcbpi32";
+            linkSubmodule =
+              n: v:
+              let
+                mod = localFlakes.${n};
+              in
+              "ln -s ${mod}/* ${v}";
+
+            linkSubmodules = concatStringsSep "\n" (mapAttrsToList linkSubmodule submodulesIndeks);
+
+            hjson = buildPythonPackage rec {
+              pname = "hjson";
+              version = "3.0.1";
+              src = fetchPypi {
+                inherit pname version;
+                sha256 = "1yaimcgz8w0ps1wk28wk9g9zdidp79d14xqqj9rjkvxalvx2f5qx";
+              };
+              doCheck = false;
             };
-            propagatedBuildInputs = with python3Packages; [
-              appdirs
-              argcomplete
-              colorama
+
+            milc = buildPythonPackage rec {
+              pname = "milc";
+              version = "1.0.10";
+              src = fetchPypi {
+                inherit pname version;
+                sha256 = "1q1p7qrqk78mw67nhv04zgxaq8himmdxmy2vp4fmi7chwgcbpi32";
+              };
+              propagatedBuildInputs = with python3Packages; [
+                appdirs
+                argcomplete
+                colorama
+              ];
+              doCheck = false;
+            };
+
+            pythonEnv = python3.withPackages (
+              p: with p; [
+                # requirements.txt
+                appdirs
+                argcomplete
+                colorama
+                hjson
+                jsonschema
+                milc
+                pygments
+                # requirements-dev.txt
+                nose2
+                flake8
+                pep8-naming
+                yapf
+              ]
+            );
+
+            avrlibc = pkgsCross.avr.libcCross;
+            avr_incflags = [
+              "-isystem ${avrlibc}/avr/include"
+              "-B${avrlibc}/avr/lib/avr5"
+              "-L${avrlibc}/avr/lib/avr5"
+              "-B${avrlibc}/avr/lib/avr35"
+              "-L${avrlibc}/avr/lib/avr35"
+              "-B${avrlibc}/avr/lib/avr51"
+              "-L${avrlibc}/avr/lib/avr51"
             ];
-            doCheck = false;
-          };
 
-          pythonEnv = python3.withPackages (p: with p; [
-            # requirements.txt
-            appdirs
-            argcomplete
-            colorama
-            hjson
-            jsonschema
-            milc
-            pygments
-            # requirements-dev.txt
-            nose2
-            flake8
-            pep8-naming
-            yapf
-          ]);
+            bypassGccBug = true;
+            disableArrayBoundsFlag = "-Wno-array-bounds";
 
-          avrlibc = pkgsCross.avr.libcCross;
-          avr_incflags = [
-            "-isystem ${avrlibc}/avr/include"
-            "-B${avrlibc}/avr/lib/avr5"
-            "-L${avrlibc}/avr/lib/avr5"
-            "-B${avrlibc}/avr/lib/avr35"
-            "-L${avrlibc}/avr/lib/avr35"
-            "-B${avrlibc}/avr/lib/avr51"
-            "-L${avrlibc}/avr/lib/avr51"
-          ];
+            avrPackages = [
+              avrdude
+              pkgsCross.avr.buildPackages.gcc
+              pkgsCross.avr.buildPackages.binutils
+              avrlibc
+            ];
 
-          bypassGccBug = true;
-          disableArrayBoundsFlag = "-Wno-array-bounds";
+            mkQmkOS =
+              {
+                kibord,
+                avr ? false,
+                arm ? false,
+                teensy ? false,
+              }:
+              let
+                inherit (kibord) iuniksDir keyboardModel;
+                keymap = builtins.baseNameOf iuniksDir;
 
-          avrPackages = [
-            avrdude
-            pkgsCross.avr.buildPackages.gcc
-            pkgsCross.avr.buildPackages.binutils
-            avrlibc
-          ];
+              in
+              mkDerivation {
+                pname = "qmk-os";
+                version = qmk_firmware.shortRev;
+                src = qmk_firmware;
 
-          mkQmkOS = { kibord, avr ? false, arm ? false, teensy ? false }:
-            let
-              inherit (kibord) iuniksDir keyboardModel;
-              keymap = builtins.baseNameOf iuniksDir;
+                buildInputs =
+                  [
+                    dfu-programmer
+                    dfu-util
+                    diffutils
+                    git
+                    pythonEnv
+                  ]
+                  ++ optionals avr avrPackages
+                  ++ optionals arm [ gcc-arm-embedded ]
+                  ++ optionals teensy [ teensy-loader-cli ];
 
-            in
-            mkDerivation {
-              pname = "qmk-os";
-              version = qmk_firmware.shortRev;
-              src = qmk_firmware;
+                postPatch = ''
+                  ${linkSubmodules}
+                  ln -s ${iuniksDir} ./keyboards/${keyboardModel}/keymaps/${keymap}
+                '';
 
-              buildInputs = [ dfu-programmer dfu-util diffutils git pythonEnv ]
-                ++ optionals avr avrPackages
-                ++ optionals arm [ gcc-arm-embedded ]
-                ++ optionals teensy [ teensy-loader-cli ];
+                CFLAGS = optionals avr avr_incflags ++ (optional bypassGccBug disableArrayBoundsFlag);
+                ASFLAGS = optionals avr avr_incflags;
 
+                buildPhase = ''
+                  make ${keyboardModel}:${keymap}
+                '';
+
+                installPhase = ''
+                  mkdir -p $out
+                  cp ./.build/*hex $out/
+                '';
+              };
+
+            hexdump = buildPythonPackage {
+              pname = "hexdump";
+              version = hexdumpSrc.shortRev;
+              src = hexdumpSrc;
+              doCheck = false;
+            };
+
+            easyhid = buildPythonPackage rec {
+              pname = "easyhid";
+              version = "0.0.9";
+              src = fetchPypi {
+                inherit pname version;
+                sha256 = "68bfed780bb0c2cebebfc1e977093985b0ccb512ad20b8bb030d73b525f3eaf2";
+              };
               postPatch = ''
-                ${linkSubmodules}
-                ln -s ${iuniksDir} ./keyboards/${keyboardModel}/keymaps/${keymap}
+                substituteInPlace easyhid/easyhid.py \
+                  --replace "ctypes.util.find_library('hidapi-libusb')" \
+                  "'${hidapi}/lib/libhidapi-libusb.so.0'"
               '';
-
-              CFLAGS = optionals avr avr_incflags ++ (optional bypassGccBug disableArrayBoundsFlag);
-              ASFLAGS = optionals avr avr_incflags;
-
-              buildPhase = ''
-                make ${keyboardModel}:${keymap}
-              '';
-
-              installPhase = ''
-                mkdir -p $out
-                cp ./.build/*hex $out/
-              '';
+              buildInputs = [
+                hidapi
+                cffi
+              ];
             };
 
+            kpBootPackages = [
+              intelhex
+              cffi
+              hexdump
+              easyhid
+              hidapi
+            ];
 
-          hexdump = buildPythonPackage {
-            pname = "hexdump";
-            version = hexdumpSrc.shortRev;
-            src = hexdumpSrc;
-            doCheck = false;
-          };
-
-          easyhid = buildPythonPackage rec {
-            pname = "easyhid";
-            version = "0.0.9";
-            src = fetchPypi {
-              inherit pname version;
-              sha256 = "68bfed780bb0c2cebebfc1e977093985b0ccb512ad20b8bb030d73b525f3eaf2";
+            kpBootCli = buildPythonApplication {
+              name = "kp-boot-cli";
+              version = kp_boot_32u4.shortRev;
+              src = kp_boot_32u4;
+              propagatedBuildInputs = kpBootPackages;
             };
-            postPatch = ''
-              substituteInPlace easyhid/easyhid.py \
-                --replace "ctypes.util.find_library('hidapi-libusb')" \
-                "'${hidapi}/lib/libhidapi-libusb.so.0'"
-            '';
-            buildInputs = [ hidapi cffi ];
-          };
 
-          kpBootPackages = [
-            intelhex
-            cffi
-            hexdump
-            easyhid
-            hidapi
-          ];
+            kpBootloader = mkDerivation {
+              name = "kp-bootloader";
+              version = kp_boot_32u4.shortRev;
+              src = kp_boot_32u4;
+              buildInputs =
+                kpBootPackages # May not be needed
+                ++ avrPackages;
+            };
 
-          kpBootCli = buildPythonApplication {
-            name = "kp-boot-cli";
-            version = kp_boot_32u4.shortRev;
-            src = kp_boot_32u4;
-            propagatedBuildInputs = kpBootPackages;
-          };
+          in
+          {
+            inherit kpBootCli kpBootloader;
 
-          kpBootloader = mkDerivation {
-            name = "kp-bootloader";
-            version = kp_boot_32u4.shortRev;
-            src = kp_boot_32u4;
-            buildInputs = kpBootPackages # May not be needed
-              ++ avrPackages;
-          };
-
-        in
-        {
-          inherit kpBootCli kpBootloader;
-
-          LiGoldragon = {
-            minidox = mkQmkOS {
-              avr = true;
-              kibord = {
-                iuniksDir = ./maple_computing/minidox/one;
-                keyboardModel = "ergodone";
+            LiGoldragon = {
+              minidox = mkQmkOS {
+                avr = true;
+                kibord = {
+                  iuniksDir = ./maple_computing/minidox/one;
+                  keyboardModel = "ergodone";
+                };
+              };
+              ergodone = mkQmkOS {
+                avr = true;
+                kibord = {
+                  iuniksDir = ./ergodone/coleremak;
+                  keyboardModel = "ergodone";
+                };
               };
             };
-            ergodone = mkQmkOS {
-              avr = true;
-              kibord = {
-                iuniksDir = ./ergodone/coleremak;
-                keyboardModel = "ergodone";
-              };
-            };
+
           };
 
-        };
-
+      };
     };
-  };
 }
