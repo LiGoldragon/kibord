@@ -53,10 +53,10 @@
       ...
     }:
     {
-      SobUyrld = {
-        modz = [ "pkgs" ];
+      SubWorld = {
+        mods = [ "pkgs" ];
 
-        lamdy =
+        lambda =
           with builtins;
           {
             self,
