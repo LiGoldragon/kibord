@@ -46,7 +46,6 @@
 
   outputs =
     localFlakes@{
-      self,
       qmk_firmware,
       kp_boot_32u4,
       hexdumpSrc,
@@ -59,7 +58,7 @@
         lambda =
           with builtins;
           {
-            self,
+            src,
             lib,
             pkgsCross,
             stdenv,
