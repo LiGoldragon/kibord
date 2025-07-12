@@ -114,6 +114,8 @@
                 sha256 = "1yaimcgz8w0ps1wk28wk9g9zdidp79d14xqqj9rjkvxalvx2f5qx";
               };
               doCheck = false;
+              pyproject = true;
+              build-system = [ python3Packages.setuptools ];
             };
 
             milc = buildPythonPackage rec {
@@ -129,6 +131,8 @@
                 colorama
               ];
               doCheck = false;
+              pyproject = true;
+              build-system = [ python3Packages.setuptools ];
             };
 
             pythonEnv = python3.withPackages (
@@ -222,6 +226,8 @@
               version = hexdumpSrc.shortRev;
               src = hexdumpSrc;
               doCheck = false;
+              pyproject = true;
+              build-system = [ python3Packages.setuptools ];
             };
 
             easyhid = buildPythonPackage rec {
@@ -240,6 +246,8 @@
                 hidapi
                 cffi
               ];
+              pyproject = true;
+              build-system = [ python3Packages.setuptools ];
             };
 
             kpBootPackages = [
@@ -255,6 +263,8 @@
               version = kp_boot_32u4.shortRev;
               src = kp_boot_32u4;
               propagatedBuildInputs = kpBootPackages;
+              pyproject = true;
+              build-system = [ python3Packages.setuptools ];
             };
 
             kpBootloader = mkDerivation {
