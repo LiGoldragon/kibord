@@ -14,7 +14,7 @@ nix build .#minidox
 
 The build output is a hex artifact under `result/`, normally named `maple_computing_minidox_rev1_LiGoldragon.hex`.
 
-The base layer sends QWERTY-position letter keycodes on purpose. With the host layout set to `us(colemak)`, those keycodes produce Colemak letters without applying Colemak in both firmware and the operating system.
+The base layer intentionally emits Colemak letter keycodes from the firmware. A raw QWERTY host should receive `qwfpgjluy;` from the physical top row. Do not additionally Colemak-remap the MiniDox in the operating system; any OS-side Colemak treatment should be applied separately and per-device for the laptop keyboard.
 
 ## Pre-Flash Safety
 
