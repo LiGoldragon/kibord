@@ -2,8 +2,9 @@
   description = "kibord";
 
   inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     qmk_firmware = {
-      url = "github:qmk/qmk_firmware/bc15c4f4ab81c1e2950dfc1c38cf86dc626573c9";
+      url = "github:qmk/qmk_firmware/0.33.8";
       flake = false;
     };
     ChibiOS = {
@@ -12,10 +13,6 @@
     };
     ChibiOS-Contrib = {
       url = "github:qmk/ChibiOS-Contrib";
-      flake = false;
-    };
-    uGFX = {
-      url = "github:qmk/uGFX";
       flake = false;
     };
     googletest = {
@@ -46,13 +43,22 @@
 
   outputs =
     localFlakes@{
+      self,
+      nixpkgs,
       qmk_firmware,
       kp_boot_32u4,
       hexdumpSrc,
       ...
     }:
-    {
-      SubWorld = {
+    let
+      supportedSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
+
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+
+      subWorld = {
         mods = [ "pkgs" ];
 
         lambda =
@@ -73,6 +79,7 @@
             teensy-loader-cli,
             hidapi,
             fetchhg,
+            qmk,
           }:
 
           let
@@ -90,7 +97,6 @@
             submodulesIndeks = {
               ChibiOS = "lib/chibios";
               ChibiOS-Contrib = "lib/chibios-contrib";
-              uGFX = "lib/ugfx";
               googletest = "lib/googletest";
               lufa = "lib/lufa";
               v-usb = "lib/vusb";
@@ -106,45 +112,22 @@
 
             linkSubmodules = concatStringsSep "\n" (mapAttrsToList linkSubmodule submodulesIndeks);
 
-            hjson = buildPythonPackage rec {
-              pname = "hjson";
-              version = "3.0.1";
-              src = fetchPypi {
-                inherit pname version;
-                sha256 = "1yaimcgz8w0ps1wk28wk9g9zdidp79d14xqqj9rjkvxalvx2f5qx";
-              };
-              doCheck = false;
-              pyproject = true;
-              build-system = [ python3Packages.setuptools ];
-            };
-
-            milc = buildPythonPackage rec {
-              pname = "milc";
-              version = "1.0.10";
-              src = fetchPypi {
-                inherit pname version;
-                sha256 = "1q1p7qrqk78mw67nhv04zgxaq8himmdxmy2vp4fmi7chwgcbpi32";
-              };
-              propagatedBuildInputs = with python3Packages; [
-                appdirs
-                argcomplete
-                colorama
-              ];
-              doCheck = false;
-              pyproject = true;
-              build-system = [ python3Packages.setuptools ];
-            };
-
             pythonEnv = python3.withPackages (
               p: with p; [
                 # requirements.txt
                 appdirs
                 argcomplete
                 colorama
+                dotty-dict
+                hid
                 hjson
                 jsonschema
                 milc
+                pillow
                 pygments
+                pyserial
+                pyusb
+                platformdirs
                 # requirements-dev.txt
                 nose2
                 flake8
@@ -153,7 +136,7 @@
               ]
             );
 
-            avrlibc = pkgsCross.avr.libcCross;
+            avrlibc = pkgsCross.avr.libc;
             avr_incflags = [
               "-isystem ${avrlibc}/avr/include"
               "-B${avrlibc}/avr/lib/avr5"
@@ -183,6 +166,7 @@
               }:
               let
                 inherit (kibord) iuniksDir keyboardModel;
+                keymapKeyboardModel = kibord.keymapKeyboardModel or keyboardModel;
                 keymap = builtins.baseNameOf iuniksDir;
 
               in
@@ -191,21 +175,22 @@
                 version = qmk_firmware.shortRev;
                 src = qmk_firmware;
 
-                buildInputs =
-                  [
-                    dfu-programmer
-                    dfu-util
-                    diffutils
-                    git
-                    pythonEnv
-                  ]
-                  ++ optionals avr avrPackages
-                  ++ optionals arm [ gcc-arm-embedded ]
-                  ++ optionals teensy [ teensy-loader-cli ];
+                buildInputs = [
+                  dfu-programmer
+                  dfu-util
+                  diffutils
+                  git
+                  qmk
+                  pythonEnv
+                ]
+                ++ optionals avr avrPackages
+                ++ optionals arm [ gcc-arm-embedded ]
+                ++ optionals teensy [ teensy-loader-cli ];
 
                 postPatch = ''
                   ${linkSubmodules}
-                  ln -s ${iuniksDir} ./keyboards/${keyboardModel}/keymaps/${keymap}
+                  mkdir -p ./keyboards/${keymapKeyboardModel}/keymaps
+                  ln -s ${iuniksDir} ./keyboards/${keymapKeyboardModel}/keymaps/${keymap}
                 '';
 
                 CFLAGS = optionals avr avr_incflags ++ (optional bypassGccBug disableArrayBoundsFlag);
@@ -284,8 +269,9 @@
               minidox = mkQmkOS {
                 avr = true;
                 kibord = {
-                  iuniksDir = ./maple_computing/minidox/one;
-                  keyboardModel = "ergodone";
+                  iuniksDir = ./maple_computing/minidox/LiGoldragon;
+                  keyboardModel = "maple_computing/minidox/rev1";
+                  keymapKeyboardModel = "maple_computing/minidox";
                 };
               };
               ergodone = mkQmkOS {
@@ -300,5 +286,51 @@
           };
 
       };
+
+      buildFor =
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in
+        subWorld.lambda {
+          src = self;
+          inherit (pkgs)
+            lib
+            stdenv
+            python3
+            python3Packages
+            dfu-programmer
+            dfu-util
+            diffutils
+            git
+            avrdude
+            gcc-arm-embedded
+            teensy-loader-cli
+            hidapi
+            fetchhg
+            qmk
+            ;
+          pkgsCross = pkgs.pkgsCross;
+        };
+    in
+    {
+      SubWorld = subWorld;
+
+      packages = forAllSystems (
+        system:
+        let
+          build = buildFor system;
+        in
+        {
+          default = build.LiGoldragon.minidox;
+          minidox = build.LiGoldragon.minidox;
+          ergodone = build.LiGoldragon.ergodone;
+          inherit (build) kpBootCli kpBootloader;
+        }
+      );
+
+      checks = forAllSystems (system: {
+        minidox = self.packages.${system}.minidox;
+      });
     };
 }
