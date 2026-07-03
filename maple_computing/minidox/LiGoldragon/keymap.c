@@ -14,11 +14,74 @@ enum layers {
 #define NUMBERS_ENT LT(NUMBERS, KC_ENT)
 #define HIDDEN_BOOT QK_BOOT
 
-// These old SAFE_RANGE keycodes were present in the left binary, but their
-// stripped process_record_user behavior was not recovered.
-#define RECOVERED_USER_0 QK_USER_0
-#define RECOVERED_USER_1 QK_USER_1
-#define RECOVERED_USER_3 QK_USER_3
+enum combo_events {
+    LEADER_J_BASE,
+    LEADER_L_SYMBOLS,
+    LEADER_U_NUMBERS,
+    LEADER_Y_FUNCTIONS,
+    LEADER_SEMICOLON_QWERTY,
+};
+
+const uint16_t PROGMEM leader_j_combo[] = {QK_LEAD, KC_J, COMBO_END};
+const uint16_t PROGMEM leader_l_combo[] = {QK_LEAD, KC_L, COMBO_END};
+const uint16_t PROGMEM leader_u_combo[] = {QK_LEAD, KC_U, COMBO_END};
+const uint16_t PROGMEM leader_y_combo[] = {QK_LEAD, KC_Y, COMBO_END};
+const uint16_t PROGMEM leader_semicolon_combo[] = {QK_LEAD, KC_SCLN, COMBO_END};
+
+combo_t key_combos[] = {
+    [LEADER_J_BASE]           = COMBO_ACTION(leader_j_combo),
+    [LEADER_L_SYMBOLS]        = COMBO_ACTION(leader_l_combo),
+    [LEADER_U_NUMBERS]        = COMBO_ACTION(leader_u_combo),
+    [LEADER_Y_FUNCTIONS]      = COMBO_ACTION(leader_y_combo),
+    [LEADER_SEMICOLON_QWERTY] = COMBO_ACTION(leader_semicolon_combo),
+};
+
+uint8_t combo_ref_from_layer(uint8_t layer) {
+    (void)layer;
+    return BASE;
+}
+
+static void move_to_layer(uint8_t target_layer) {
+    if (get_highest_layer(layer_state) == target_layer) {
+        return;
+    }
+
+    reset_oneshot_layer();
+    if (target_layer == BASE) {
+        layer_clear();
+    } else {
+        layer_move(target_layer);
+    }
+}
+
+void process_combo_event(uint16_t combo_index, bool pressed) {
+    if (!pressed) {
+        return;
+    }
+
+    switch (combo_index) {
+        case LEADER_J_BASE:
+            move_to_layer(BASE);
+            break;
+        case LEADER_L_SYMBOLS:
+            move_to_layer(SYMBOLS);
+            break;
+        case LEADER_U_NUMBERS:
+            move_to_layer(NUMBERS);
+            break;
+        case LEADER_Y_FUNCTIONS:
+            move_to_layer(FUNCTIONS);
+            break;
+        case LEADER_SEMICOLON_QWERTY:
+            move_to_layer(QWERTY_RECOVERED);
+            break;
+    }
+}
+
+static void set_leader_oneshot_layer(uint8_t layer) {
+    set_oneshot_layer(layer, ONESHOT_START);
+    clear_oneshot_layer_state(ONESHOT_PRESSED);
+}
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* Base: recovered firmware-Colemak.
@@ -88,7 +151,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                 _______, _______, KC_TAB,          KC_ENT,   _______,        _______
     ),
 
-    /* Functions: tri-layer only. QK_BOOT remains tucked away here as a
+    /* Functions: direct layer. QK_BOOT remains tucked away here as a
      * last-resort fallback; leader r e s e t is the documented reset path.
      *
      * ,----------------------------------.           ,----------------------------------.
@@ -96,7 +159,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |------+------+------+------+------|           |------+------+------+------+------|
      * |  F11 | Boot |      |      |      |           |      | PrSc |Scroll|Pause | F12  |
      * |------+------+------+------+------|           |------+------+------+------+------|
-     * |      |User 0|User 1|      |      |           | Boot |      |      |      |      |
+     * |      |  No  |  No  |      |      |           | Boot |      |      |      |      |
      * `----------------------------------'           `----------------------------------'
      *                  ,--------------------.    ,------,-------------.
      *                  |      |      |      |    |      |      |      |
@@ -107,7 +170,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [FUNCTIONS] = LAYOUT_split_3x5_3(
         KC_F1,          KC_F2,          KC_F3,          KC_F4,   KC_F5,            KC_F6,    KC_F7,          KC_F8,          KC_F9,          KC_F10,
         KC_F11,         HIDDEN_BOOT,    _______,        _______, _______,          _______,  KC_PSCR,        KC_SCRL,        KC_PAUS,        KC_F12,
-        _______,        RECOVERED_USER_0, RECOVERED_USER_1, _______, _______,      HIDDEN_BOOT, _______,     _______,        _______,        _______,
+        _______,        KC_NO,          KC_NO,          _______, _______,          HIDDEN_BOOT, _______,     _______,        _______,        _______,
                                                 _______, _______, _______,         _______,  _______,        _______
     ),
 
@@ -121,7 +184,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * | Sft/A|   X  |   C  |   V  | Gui/B|           | Gui/N|   M  |   ,  |   .  |Sft/; |
      * `----------------------------------'           `----------------------------------'
      *                  ,--------------------.    ,------,-------------.
-     *                  | Sym  |User 3| Num  |    | Num  | AltSp| Num  |
+     *                  | Sym  |  No  | Num  |    | Num  | AltSp| Num  |
      *                  `-------------| Space|    | Enter|------+------.
      *                                |      |    |      |
      *                                `------'    `------'
@@ -130,17 +193,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_Q,           KC_W,           KC_E,           KC_R,    KC_T,             KC_Y,     KC_U,           KC_I,           KC_O,           KC_P,
         KC_Z,           LCTL_T(KC_S),   LALT_T(KC_D),   KC_F,    KC_G,             KC_H,     KC_J,           RALT_T(KC_K),   RCTL_T(KC_L),   KC_SLSH,
         LSFT_T(KC_A),   KC_X,           KC_C,           KC_V,    LGUI_T(KC_B),     RGUI_T(KC_N), KC_M,       KC_COMM,        KC_DOT,         RSFT_T(KC_SCLN),
-                                                SYMBOLS_BSPC, RECOVERED_USER_3, NUMBERS_SPC, NUMBERS_ENT, LALT(KC_SPC), NUMBERS_ESC
+                                                SYMBOLS_BSPC, KC_NO, NUMBERS_SPC,  NUMBERS_ENT, LALT(KC_SPC), NUMBERS_ESC
     ),
 };
-
-layer_state_t layer_state_set_user(layer_state_t state) {
-    return update_tri_layer_state(state, SYMBOLS, NUMBERS, FUNCTIONS);
-}
 
 void leader_end_user(void) {
     if (leader_sequence_five_keys(KC_R, KC_E, KC_S, KC_E, KC_T)) {
         reset_keyboard();
+    } else if (leader_sequence_two_keys(KC_L, KC_S)) {
+        set_leader_oneshot_layer(SYMBOLS);
+    } else if (leader_sequence_two_keys(KC_L, KC_N)) {
+        set_leader_oneshot_layer(NUMBERS);
+    } else if (leader_sequence_two_keys(KC_L, KC_F)) {
+        set_leader_oneshot_layer(FUNCTIONS);
+    } else if (leader_sequence_two_keys(KC_L, KC_Q)) {
+        set_leader_oneshot_layer(QWERTY_RECOVERED);
     } else if (leader_sequence_one_key(KC_S)) {
         set_oneshot_mods(MOD_BIT(KC_LSFT));
     } else if (leader_sequence_one_key(KC_C)) {

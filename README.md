@@ -24,7 +24,7 @@ Confidence:
 - High: top-row base output `Q W F P G / J L U Y ;`, the left artifact's layer 3 resembling the right artifact's layer 1 `NUMBERS` layer, `QK_LEAD`, `QK_BOOT`, and leader sequence `r e s e t` entering QMK's reset path.
 - Medium: `SYMBOLS`, `FUNCTIONS`, and the retained non-default `QWERTY_RECOVERED` layer from the longer left artifact.
 - Known unknown: exact physical placement for some home/bottom row positions because the current QMK `LAYOUT_split_3x5_3` macro may not match the old build source's matrix-to-physical assumptions.
-- Known unknown: recovered `QK_USER_0`, `QK_USER_1`, and `QK_USER_3` positions are preserved as inert historical placeholders because their stripped `process_record_user` behavior was not proven.
+- Known unknown: exact behavior for the old recovered user-code positions was not recovered. They are explicit `KC_NO` positions now, not hidden placeholders.
 
 ## MiniDox Build
 
@@ -45,15 +45,28 @@ First-cycle workflow:
 
 ## MiniDox Bootloader Entry
 
-This keymap enables QMK Leader support for deliberate bootloader and one-shot modifier sequences:
+This keymap enables QMK Leader support for deliberate bootloader, one-shot modifier, and base-expected one-shot layer sequences:
 
 - Tap `QK_LEAD` on the base thumb row, then type `r e s e t` on the base layer. The sequence calls QMK's bootloader reset path.
 - Tap `QK_LEAD`, then `s` for one-shot Shift.
 - Tap `QK_LEAD`, then `c` for one-shot Ctrl.
 - Tap `QK_LEAD`, then `a` for one-shot Alt.
 - Tap `QK_LEAD`, then `g` for one-shot Gui.
+- Tap `QK_LEAD`, then `l s` for one-shot `SYMBOLS`.
+- Tap `QK_LEAD`, then `l n` for one-shot `NUMBERS`.
+- Tap `QK_LEAD`, then `l f` for one-shot `FUNCTIONS`.
+- Tap `QK_LEAD`, then `l q` for one-shot `QWERTY_RECOVERED`.
 - The `FUNCTIONS` layer also keeps tucked-away direct `QK_BOOT` fallback positions recovered from the left artifact.
-- Entering `SYMBOLS` and `NUMBERS` together activates `FUNCTIONS` through QMK tri-layer handling.
+
+Persistent MiniDox layer switching uses QMK combos. Each chord is resolved from `BASE`, so the physical chord works from every layer:
+
+- Hold left thumb `QK_LEAD` plus right top-row `J` for `BASE`.
+- Hold left thumb `QK_LEAD` plus right top-row `L` for `SYMBOLS`.
+- Hold left thumb `QK_LEAD` plus right top-row `U` for `NUMBERS`.
+- Hold left thumb `QK_LEAD` plus right top-row `Y` for `FUNCTIONS`.
+- Hold left thumb `QK_LEAD` plus right top-row `;` for `QWERTY_RECOVERED`.
+
+Layer switch combos use volatile layer state only: `BASE` clears active layers, and every other target moves directly to that layer. There is no tri-layer dependency and no EEPROM-writing default-layer change.
 
 ## No-Flash Safety
 
