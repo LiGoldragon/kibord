@@ -17,7 +17,7 @@ The reconstructed source keeps a firmware-Colemak `BASE` layer. A raw QWERTY hos
 
 Confidence:
 
-- High: top-row base output `Q W F P G / J L U Y ;`, the `NUMBERS` layer recovered from both artifacts, `QK_LEAD`, `QK_BOOT`, and leader sequence `r e s e t` entering QMK's reset path.
+- High: top-row base output `Q W F P G / J L U Y ;`, the left artifact's layer 3 resembling the right artifact's layer 1 `NUMBERS` layer, `QK_LEAD`, `QK_BOOT`, and leader sequence `r e s e t` entering QMK's reset path.
 - Medium: `SYMBOLS`, `FUNCTIONS`, and the retained non-default `QWERTY_RECOVERED` layer from the longer left artifact.
 - Known unknown: exact physical placement for some home/bottom row positions because the current QMK `LAYOUT_split_3x5_3` macro may not match the old build source's matrix-to-physical assumptions.
 - Known unknown: recovered `QK_USER_0`, `QK_USER_1`, and `QK_USER_3` positions are preserved as inert historical placeholders because their stripped `process_record_user` behavior was not proven.
