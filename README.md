@@ -1,6 +1,6 @@
 # Kibord
 
-Personal QMK keymaps built with Nix. The MiniDox target is intentionally a build-only recovered source update; do not flash from this repository until the reconstructed layout, physical keyboard bootloader, half selection, and reset procedure are reviewed.
+Personal QMK keymaps built with Nix. The MiniDox target is intentionally in a build, review, then explicit-approval cycle; do not flash from this repository until the reconstructed layout, physical keyboard bootloader, half selection, and reset procedure are reviewed and approved.
 
 ## MiniDox Recovery Status
 
@@ -14,6 +14,10 @@ This keymap was reconstructed from the old MiniDox binary evidence, not from the
 - the `qmkBinaries` MiniDox artifacts at commit `f6e2093debe57ee15acedc88b3dd772cf4071fb5`
 
 The reconstructed source keeps a firmware-Colemak `BASE` layer. A raw QWERTY host should receive `qwfpgjluy;` from the physical top row. Do not additionally Colemak-remap the MiniDox in the operating system; any OS-side Colemak treatment should be applied separately and per-device for the laptop keyboard.
+
+The first clean MiniDox-native iteration keeps the recovered behavior as the starting point, but presents each layer as a physical MiniDox diagram in `keymap.c`, following the pinned upstream MiniDox default keymap's visual style. The diagrams are the review surface: each layer is shown as left hand, right hand, and two thumb clusters before its `LAYOUT_split_3x5_3(...)` block.
+
+The `NUMBERS` layer keeps the same physical number positions recovered from the old layout, but the number taps now read left-to-right as `1 2 3 4 5 6 7 8 9 0`. Positions that already carried modifier-taps still carry their modifier-tap wrappers; only the tapped number output was reordered.
 
 Confidence:
 
@@ -32,12 +36,23 @@ nix build .#minidox
 
 The build output is a hex artifact under `result/`, normally named `maple_computing_minidox_rev1_LiGoldragon.hex`.
 
+First-cycle workflow:
+
+1. Build with `nix build .#minidox`.
+2. Review `maple_computing/minidox/LiGoldragon/keymap.c` diagrams against the physical MiniDox.
+3. Compare the `result/` hex artifact only after the source layout is accepted.
+4. Flash only after explicit approval for the target half, bootloader, handedness, and recovery procedure.
+
 ## MiniDox Bootloader Entry
 
-This keymap enables QMK Leader support for a deliberate bootloader-entry sequence before any future reflashing:
+This keymap enables QMK Leader support for deliberate bootloader and one-shot modifier sequences:
 
 - Tap `QK_LEAD` on the base thumb row, then type `r e s e t` on the base layer. The sequence calls QMK's bootloader reset path.
-- The `FUNCTIONS` layer also keeps direct `QK_BOOT` fallback positions recovered from the left artifact.
+- Tap `QK_LEAD`, then `s` for one-shot Shift.
+- Tap `QK_LEAD`, then `c` for one-shot Ctrl.
+- Tap `QK_LEAD`, then `a` for one-shot Alt.
+- Tap `QK_LEAD`, then `g` for one-shot Gui.
+- The `FUNCTIONS` layer also keeps tucked-away direct `QK_BOOT` fallback positions recovered from the left artifact.
 - Entering `SYMBOLS` and `NUMBERS` together activates `FUNCTIONS` through QMK tri-layer handling.
 
 ## No-Flash Safety
