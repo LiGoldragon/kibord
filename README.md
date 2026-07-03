@@ -1,10 +1,28 @@
 # Kibord
 
-Personal QMK keymaps built with Nix. The MiniDox target is intentionally a build-only source update; do not flash from this repository until the physical keyboard's bootloader, half selection, and reset procedure are identified.
+Personal QMK keymaps built with Nix. The MiniDox target is intentionally a build-only recovered source update; do not flash from this repository until the reconstructed layout, physical keyboard bootloader, half selection, and reset procedure are reviewed.
 
-## MiniDox Build
+## MiniDox Recovery Status
 
 The MiniDox source lives at `maple_computing/minidox/LiGoldragon` and builds QMK target `maple_computing/minidox/rev1` from upstream QMK `0.33.8`.
+
+This keymap was reconstructed from the old MiniDox binary evidence, not from the previously current source. Evidence used:
+
+- `/home/li/primary/agent-outputs/MiniDoxBinaryRecoveryAvr/GeneralCodeImplementer-RecoveryReport.md`
+- `/home/li/primary/agent-outputs/MiniDoxBinaryRecoveryAvr/right.bin`
+- `/home/li/primary/agent-outputs/MiniDoxBinaryRecoveryAvr/left.bin`
+- the `qmkBinaries` MiniDox artifacts at commit `f6e2093debe57ee15acedc88b3dd772cf4071fb5`
+
+The reconstructed source keeps a firmware-Colemak `BASE` layer. A raw QWERTY host should receive `qwfpgjluy;` from the physical top row. Do not additionally Colemak-remap the MiniDox in the operating system; any OS-side Colemak treatment should be applied separately and per-device for the laptop keyboard.
+
+Confidence:
+
+- High: top-row base output `Q W F P G / J L U Y ;`, the `NUMBERS` layer recovered from both artifacts, `QK_LEAD`, `QK_BOOT`, and leader sequence `r e s e t` entering QMK's reset path.
+- Medium: `SYMBOLS`, `FUNCTIONS`, and the retained non-default `QWERTY_RECOVERED` layer from the longer left artifact.
+- Known unknown: exact physical placement for some home/bottom row positions because the current QMK `LAYOUT_split_3x5_3` macro may not match the old build source's matrix-to-physical assumptions.
+- Known unknown: recovered `QK_USER_0`, `QK_USER_1`, and `QK_USER_3` positions are preserved as inert historical placeholders because their stripped `process_record_user` behavior was not proven.
+
+## MiniDox Build
 
 Build the firmware artifact:
 
@@ -14,21 +32,19 @@ nix build .#minidox
 
 The build output is a hex artifact under `result/`, normally named `maple_computing_minidox_rev1_LiGoldragon.hex`.
 
-The base layer intentionally emits Colemak letter keycodes from the firmware. A raw QWERTY host should receive `qwfpgjluy;` from the physical top row. Do not additionally Colemak-remap the MiniDox in the operating system; any OS-side Colemak treatment should be applied separately and per-device for the laptop keyboard.
-
-The number row is on `RAISE` and keeps the existing number-key physical positions. Its outputs are ordered in the conventional left-to-right direction: `1` starts on the left pinky side and `0` ends on the right pinky side.
-
 ## MiniDox Bootloader Entry
 
 This keymap enables QMK Leader support for a deliberate bootloader-entry sequence before any future reflashing:
 
-- Hold `LOWER` and `RAISE` together to enter `ADJUST`, tap the left home-row pinky `QK_LEAD` key, release the layer keys, then type `r e s e t` on the base layer. The sequence calls QMK's bootloader reset path.
-- As a tucked-away fallback matching the upstream MiniDox default's reset placement, `ADJUST` also has a direct `QK_BOOT` key on the left bottom-row pinky position.
+- Tap `QK_LEAD` on the base thumb row, then type `r e s e t` on the base layer. The sequence calls QMK's bootloader reset path.
+- The `FUNCTIONS` layer also keeps direct `QK_BOOT` fallback positions recovered from the left artifact.
+- Entering `SYMBOLS` and `NUMBERS` together activates `FUNCTIONS` through QMK tri-layer handling.
 
-## Pre-Flash Safety
+## No-Flash Safety
 
-Flashing is out of scope until the hardware facts are known. Before any flash attempt:
+Flashing is out of scope for this repository state. Before any flash attempt:
 
+- Review the reconstructed keymap against the binary evidence and the actual physical MiniDox.
 - Identify each half's controller and bootloader without intentionally entering bootloader mode during ordinary typing work.
 - Confirm which half is connected over USB and how handedness is selected.
 - Flash one half at a time only after the matching bootloader and artifact are known.
