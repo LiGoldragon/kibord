@@ -14,39 +14,15 @@ enum layers {
 #define NUMBERS_ENT LT(NUMBERS, KC_ENT)
 #define HIDDEN_BOOT QK_BOOT
 
-enum combo_events {
-    LEADER_J_BASE,
-    LEADER_L_SYMBOLS,
-    LEADER_U_NUMBERS,
-    LEADER_Y_FUNCTIONS,
-    LEADER_SEMICOLON_QWERTY,
-};
-
-const uint16_t PROGMEM leader_j_combo[] = {QK_LEAD, KC_J, COMBO_END};
-const uint16_t PROGMEM leader_l_combo[] = {QK_LEAD, KC_L, COMBO_END};
-const uint16_t PROGMEM leader_u_combo[] = {QK_LEAD, KC_U, COMBO_END};
-const uint16_t PROGMEM leader_y_combo[] = {QK_LEAD, KC_Y, COMBO_END};
-const uint16_t PROGMEM leader_semicolon_combo[] = {QK_LEAD, KC_SCLN, COMBO_END};
-
-combo_t key_combos[] = {
-    [LEADER_J_BASE]           = COMBO_ACTION(leader_j_combo),
-    [LEADER_L_SYMBOLS]        = COMBO_ACTION(leader_l_combo),
-    [LEADER_U_NUMBERS]        = COMBO_ACTION(leader_u_combo),
-    [LEADER_Y_FUNCTIONS]      = COMBO_ACTION(leader_y_combo),
-    [LEADER_SEMICOLON_QWERTY] = COMBO_ACTION(leader_semicolon_combo),
-};
-
-uint8_t combo_ref_from_layer(uint8_t layer) {
-    (void)layer;
-    return BASE;
-}
+static uint8_t leader_saved_layer = BASE;
 
 static void move_to_layer(uint8_t target_layer) {
+    reset_oneshot_layer();
+
     if (get_highest_layer(layer_state) == target_layer) {
         return;
     }
 
-    reset_oneshot_layer();
     if (target_layer == BASE) {
         layer_clear();
     } else {
@@ -54,27 +30,11 @@ static void move_to_layer(uint8_t target_layer) {
     }
 }
 
-void process_combo_event(uint16_t combo_index, bool pressed) {
-    if (!pressed) {
-        return;
-    }
-
-    switch (combo_index) {
-        case LEADER_J_BASE:
-            move_to_layer(BASE);
-            break;
-        case LEADER_L_SYMBOLS:
-            move_to_layer(SYMBOLS);
-            break;
-        case LEADER_U_NUMBERS:
-            move_to_layer(NUMBERS);
-            break;
-        case LEADER_Y_FUNCTIONS:
-            move_to_layer(FUNCTIONS);
-            break;
-        case LEADER_SEMICOLON_QWERTY:
-            move_to_layer(QWERTY_RECOVERED);
-            break;
+static void restore_leader_layer(void) {
+    if (leader_saved_layer == BASE) {
+        layer_clear();
+    } else {
+        layer_move(leader_saved_layer);
     }
 }
 
@@ -94,7 +54,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * | Sft/A|   X  |   C  |   V  | Gui/B|           | Gui/K|   M  |   ,  |   .  | Sft/O|
      * `----------------------------------'           `----------------------------------'
      *                  ,--------------------.    ,------,-------------.
-     *                  | Bspc | Lead | Num  |    | Num  | AltSp| Num  |
+     *                  | Bspc | Lead | Num  |    | Num  | Lead | Num  |
      *                  `-------------| Space|    | Enter|------+------.
      *                                |      |    |      |
      *                                `------'    `------'
@@ -103,7 +63,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_Q,           KC_W,           KC_F,           KC_P,    KC_G,             KC_J,     KC_L,           KC_U,           KC_Y,           KC_SCLN,
         KC_Z,           LCTL_T(KC_R),   LALT_T(KC_S),   KC_T,    KC_D,             KC_H,     KC_N,           RALT_T(KC_E),   RCTL_T(KC_I),   KC_SLSH,
         LSFT_T(KC_A),   KC_X,           KC_C,           KC_V,    LGUI_T(KC_B),     RGUI_T(KC_K), KC_M,       KC_COMM,        KC_DOT,         RSFT_T(KC_O),
-                                                KC_BSPC, QK_LEAD, NUMBERS_SPC, NUMBERS_ENT, LALT(KC_SPC), NUMBERS_ESC
+                                                KC_BSPC, QK_LEAD, NUMBERS_SPC, NUMBERS_ENT, QK_LEAD,       NUMBERS_ESC
     ),
 
     /* Symbols: retained recovered left-artifact layer.
@@ -116,7 +76,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |   ~  | Left | Down |Right | End  |           | PgDn |   %  |   "  |   :  |   /  |
      * `----------------------------------'           `----------------------------------'
      *                  ,--------------------.    ,------,-------------.
-     *                  |      |  Del | Esc  |    | Tab  |   |  |      |
+     *                  |      | Lead | Esc  |    | Tab  | Lead |      |
      *                  `-------------|      |    |      |------+------.
      *                                |      |    |      |
      *                                `------'    `------'
@@ -125,7 +85,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_EXLM,        KC_AT,          KC_HASH,        KC_DLR,  KC_PERC,          KC_CIRC,  KC_AMPR,        KC_ASTR,        KC_LPRN,        KC_RPRN,
         KC_CAPS,        _______,        KC_UP,          _______, KC_HOME,          KC_PGUP,  KC_PLUS,        KC_LCBR,        KC_RCBR,        KC_UNDS,
         KC_TILD,        KC_LEFT,        KC_DOWN,        KC_RGHT, KC_END,           KC_PGDN,  KC_PERC,        KC_DQUO,        KC_COLN,        KC_SLSH,
-                                                _______, KC_DEL, KC_ESC,           KC_TAB,   KC_PIPE,        _______
+                                                _______, QK_LEAD, KC_ESC,          KC_TAB,   QK_LEAD,        _______
     ),
 
     /* Numbers: recovered navigation shape, with number taps reordered by
@@ -139,7 +99,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * | Sft/1| Left | Down |   [  | Gui/5|           | Gui/6|   ]  |  Up  |Right | Sft/0|
      * `----------------------------------'           `----------------------------------'
      *                  ,--------------------.    ,------,-------------.
-     *                  |      |      | Tab  |    | Enter|      |      |
+     *                  |      | Lead | Tab  |    | Enter| Lead |      |
      *                  `-------------|      |    |      |------+------.
      *                                |      |    |      |
      *                                `------'    `------'
@@ -148,7 +108,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_GRV,         _______,        _______,        KC_PGDN, KC_HOME,          KC_END,   KC_PGUP,        _______,        _______,        KC_BSLS,
         KC_CAPS,        KC_2,           KC_3,           KC_4,    KC_MINS,          KC_EQL,   KC_7,           KC_8,           KC_9,           KC_QUOT,
         LSFT_T(KC_1),   KC_LEFT,        KC_DOWN,        KC_LBRC, LGUI_T(KC_5),     RGUI_T(KC_6), KC_RBRC,    KC_UP,          KC_RGHT,        RSFT_T(KC_0),
-                                                _______, _______, KC_TAB,          KC_ENT,   _______,        _______
+                                                _______, QK_LEAD, KC_TAB,          KC_ENT,   QK_LEAD,        _______
     ),
 
     /* Functions: direct layer. QK_BOOT remains tucked away here as a
@@ -162,7 +122,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |      |  No  |  No  |      |      |           | Boot |      |      |      |      |
      * `----------------------------------'           `----------------------------------'
      *                  ,--------------------.    ,------,-------------.
-     *                  |      |      |      |    |      |      |      |
+     *                  |      | Lead |      |    |      | Lead |      |
      *                  `-------------|      |    |      |------+------.
      *                                |      |    |      |
      *                                `------'    `------'
@@ -171,7 +131,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_F1,          KC_F2,          KC_F3,          KC_F4,   KC_F5,            KC_F6,    KC_F7,          KC_F8,          KC_F9,          KC_F10,
         KC_F11,         HIDDEN_BOOT,    _______,        _______, _______,          _______,  KC_PSCR,        KC_SCRL,        KC_PAUS,        KC_F12,
         _______,        KC_NO,          KC_NO,          _______, _______,          HIDDEN_BOOT, _______,     _______,        _______,        _______,
-                                                _______, _______, _______,         _______,  _______,        _______
+                                                _______, QK_LEAD, _______,         _______,  QK_LEAD,        _______
     ),
 
     /* Qwerty Recovered: retained historical layer from the left artifact.
@@ -184,7 +144,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * | Sft/A|   X  |   C  |   V  | Gui/B|           | Gui/N|   M  |   ,  |   .  |Sft/; |
      * `----------------------------------'           `----------------------------------'
      *                  ,--------------------.    ,------,-------------.
-     *                  | Sym  |  No  | Num  |    | Num  | AltSp| Num  |
+     *                  | Sym  | Lead | Num  |    | Num  | Lead | Num  |
      *                  `-------------| Space|    | Enter|------+------.
      *                                |      |    |      |
      *                                `------'    `------'
@@ -193,28 +153,53 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_Q,           KC_W,           KC_E,           KC_R,    KC_T,             KC_Y,     KC_U,           KC_I,           KC_O,           KC_P,
         KC_Z,           LCTL_T(KC_S),   LALT_T(KC_D),   KC_F,    KC_G,             KC_H,     KC_J,           RALT_T(KC_K),   RCTL_T(KC_L),   KC_SLSH,
         LSFT_T(KC_A),   KC_X,           KC_C,           KC_V,    LGUI_T(KC_B),     RGUI_T(KC_N), KC_M,       KC_COMM,        KC_DOT,         RSFT_T(KC_SCLN),
-                                                SYMBOLS_BSPC, KC_NO, NUMBERS_SPC,  NUMBERS_ENT, LALT(KC_SPC), NUMBERS_ESC
+                                                SYMBOLS_BSPC, QK_LEAD, NUMBERS_SPC, NUMBERS_ENT, QK_LEAD,    NUMBERS_ESC
     ),
 };
+
+void leader_start_user(void) {
+    leader_saved_layer = get_highest_layer(layer_state);
+    layer_clear();
+}
 
 void leader_end_user(void) {
     if (leader_sequence_five_keys(KC_R, KC_E, KC_S, KC_E, KC_T)) {
         reset_keyboard();
+    } else if (leader_sequence_one_key(KC_A)) {
+        move_to_layer(BASE);
+    } else if (leader_sequence_one_key(KC_R)) {
+        move_to_layer(SYMBOLS);
+    } else if (leader_sequence_one_key(KC_S)) {
+        move_to_layer(NUMBERS);
+    } else if (leader_sequence_one_key(KC_T)) {
+        move_to_layer(FUNCTIONS);
+    } else if (leader_sequence_one_key(KC_G)) {
+        move_to_layer(QWERTY_RECOVERED);
     } else if (leader_sequence_two_keys(KC_L, KC_S)) {
+        restore_leader_layer();
         set_leader_oneshot_layer(SYMBOLS);
     } else if (leader_sequence_two_keys(KC_L, KC_N)) {
+        restore_leader_layer();
         set_leader_oneshot_layer(NUMBERS);
     } else if (leader_sequence_two_keys(KC_L, KC_F)) {
+        restore_leader_layer();
         set_leader_oneshot_layer(FUNCTIONS);
     } else if (leader_sequence_two_keys(KC_L, KC_Q)) {
+        restore_leader_layer();
         set_leader_oneshot_layer(QWERTY_RECOVERED);
-    } else if (leader_sequence_one_key(KC_S)) {
+    } else if (leader_sequence_two_keys(KC_M, KC_S)) {
+        restore_leader_layer();
         set_oneshot_mods(MOD_BIT(KC_LSFT));
-    } else if (leader_sequence_one_key(KC_C)) {
+    } else if (leader_sequence_two_keys(KC_M, KC_C)) {
+        restore_leader_layer();
         set_oneshot_mods(MOD_BIT(KC_LCTL));
-    } else if (leader_sequence_one_key(KC_A)) {
+    } else if (leader_sequence_two_keys(KC_M, KC_A)) {
+        restore_leader_layer();
         set_oneshot_mods(MOD_BIT(KC_LALT));
-    } else if (leader_sequence_one_key(KC_G)) {
+    } else if (leader_sequence_two_keys(KC_M, KC_G)) {
+        restore_leader_layer();
         set_oneshot_mods(MOD_BIT(KC_LGUI));
+    } else {
+        restore_leader_layer();
     }
 }

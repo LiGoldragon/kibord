@@ -45,28 +45,25 @@ First-cycle workflow:
 
 ## MiniDox Bootloader Entry
 
-This keymap enables QMK Leader support for deliberate bootloader, one-shot modifier, and base-expected one-shot layer sequences:
+This keymap enables QMK Leader support for deliberate bootloader, persistent layer switching, one-shot modifier, and base-expected one-shot layer sequences. The middle thumb key on each hand is a dedicated `QK_LEAD` position on every layer. To make the right-hand leader reachable and keep both leader keys single-purpose, the old right middle-thumb `Alt+Space` output is no longer on the base or `QWERTY_RECOVERED` layer; the old `SYMBOLS` thumb `Del` and `|` positions were also replaced by dedicated leader keys.
 
-- Tap `QK_LEAD` on the base thumb row, then type `r e s e t` on the base layer. The sequence calls QMK's bootloader reset path.
-- Tap `QK_LEAD`, then `s` for one-shot Shift.
-- Tap `QK_LEAD`, then `c` for one-shot Ctrl.
-- Tap `QK_LEAD`, then `a` for one-shot Alt.
-- Tap `QK_LEAD`, then `g` for one-shot Gui.
+- Tap either thumb `QK_LEAD`, then type `r e s e t`. The sequence calls QMK's bootloader reset path.
+- Tap either thumb `QK_LEAD`, then `a` for persistent `BASE`.
+- Tap either thumb `QK_LEAD`, then `r` for persistent `SYMBOLS`.
+- Tap either thumb `QK_LEAD`, then `s` for persistent `NUMBERS`.
+- Tap either thumb `QK_LEAD`, then `t` for persistent `FUNCTIONS`.
+- Tap either thumb `QK_LEAD`, then `g` for persistent `QWERTY_RECOVERED`.
+- Tap either thumb `QK_LEAD`, then `m s` for one-shot Shift.
+- Tap either thumb `QK_LEAD`, then `m c` for one-shot Ctrl.
+- Tap either thumb `QK_LEAD`, then `m a` for one-shot Alt.
+- Tap either thumb `QK_LEAD`, then `m g` for one-shot Gui.
 - Tap `QK_LEAD`, then `l s` for one-shot `SYMBOLS`.
 - Tap `QK_LEAD`, then `l n` for one-shot `NUMBERS`.
 - Tap `QK_LEAD`, then `l f` for one-shot `FUNCTIONS`.
 - Tap `QK_LEAD`, then `l q` for one-shot `QWERTY_RECOVERED`.
 - The `FUNCTIONS` layer also keeps tucked-away direct `QK_BOOT` fallback positions recovered from the left artifact.
 
-Persistent MiniDox layer switching uses QMK combos. Each chord is resolved from `BASE`, so the physical chord works from every layer:
-
-- Hold left thumb `QK_LEAD` plus right top-row `J` for `BASE`.
-- Hold left thumb `QK_LEAD` plus right top-row `L` for `SYMBOLS`.
-- Hold left thumb `QK_LEAD` plus right top-row `U` for `NUMBERS`.
-- Hold left thumb `QK_LEAD` plus right top-row `Y` for `FUNCTIONS`.
-- Hold left thumb `QK_LEAD` plus right top-row `;` for `QWERTY_RECOVERED`.
-
-Layer switch combos use volatile layer state only: `BASE` clears active layers, and every other target moves directly to that layer. There is no tri-layer dependency and no EEPROM-writing default-layer change.
+Persistent MiniDox layer switching uses QMK leader sequences on home-row keys. During leader sequence entry, the keymap temporarily interprets sequence keys through `BASE`, so the same physical sequence works from any current layer; non-switch leader commands restore the previous layer before applying their action. These switches use volatile layer state only: `BASE` clears active layers, and every other target moves directly to that layer. There is no tri-layer dependency and no EEPROM-writing default-layer change.
 
 ## No-Flash Safety
 
