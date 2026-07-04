@@ -17,6 +17,8 @@ The reconstructed source keeps a firmware-Colemak `BASE` layer. A raw QWERTY hos
 
 The first clean MiniDox-native iteration keeps the recovered behavior as the starting point, but presents each layer as a physical MiniDox diagram in `keymap.c`, following the pinned upstream MiniDox default keymap's visual style. The diagrams are the review surface: each layer is shown as left hand, right hand, and two thumb clusters before its `LAYOUT_split_3x5_3(...)` block.
 
+In those diagrams, thumb order is left outside, left middle, left inside, then right inside, right middle, right outside. `QK_LEAD` is deliberately on the middle thumb key on both halves, never on the outside thumb key.
+
 The `NUMBERS` layer keeps the same physical number positions recovered from the old layout, but the number taps now read left-to-right as `1 2 3 4 5 6 7 8 9 0`. Positions that already carried modifier-taps still carry their modifier-tap wrappers; only the tapped number output was reordered.
 
 Confidence:
@@ -45,7 +47,7 @@ First-cycle workflow:
 
 ## MiniDox Bootloader Entry
 
-This keymap enables QMK Leader support for deliberate bootloader, latched volatile layer switching, one-shot modifier, and base-expected one-shot layer sequences. The middle thumb key on each hand is a dedicated `QK_LEAD` position on every layer. To make the right-hand leader reachable and keep both leader keys single-purpose, the old right middle-thumb `Alt+Space` output is no longer on the base or `QWERTY_RECOVERED` layer; the old `SYMBOLS` thumb `Del` and `|` positions were also replaced by dedicated leader keys.
+This keymap enables QMK Leader support for deliberate bootloader, latched volatile layer switching, one-shot modifier, and base-expected one-shot layer sequences. The middle thumb key on each hand is a dedicated `QK_LEAD` position on every layer; the outside thumb keys remain ordinary thumb functions such as Backspace on the left and Escape or transparency on the right, depending on layer. To keep both leader keys single-purpose, the old right middle-thumb `Alt+Space` output is no longer on the base or `QWERTY_RECOVERED` layer; the old middle-thumb `SYMBOLS` outputs `Del` and `|` were also replaced by dedicated leader keys.
 
 - Tap either thumb `QK_LEAD`, then type `r e s e t`. The sequence calls QMK's bootloader reset path.
 - Tap either thumb `QK_LEAD`, then `a` to switch to `BASE`.

@@ -46,6 +46,9 @@ static void set_leader_oneshot_layer(uint8_t layer) {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /* Base: recovered firmware-Colemak.
      *
+     * Thumb order is left outside/middle/inside, then right inside/middle/outside.
+     * QK_LEAD stays on the middle thumb key on both halves.
+     *
      * ,----------------------------------.           ,----------------------------------.
      * |   Q  |   W  |   F  |   P  |   G  |           |   J  |   L  |   U  |   Y  |   ;  |
      * |------+------+------+------+------|           |------+------+------+------+------|
